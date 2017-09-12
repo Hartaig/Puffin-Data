@@ -5,26 +5,124 @@ date: "September 8, 2017"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup,message=FALSE,warning=FALSE, echo=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(knitr)
+library(MASS)
+library(boot)
+library(faraway)
+library(gridExtra)
+library(plotly)
+library(leaps)
+library(pander)
+library(grid)
+library(ggfortify)
+library(ggthemes)
+library(glmnet)
+library(lattice)
+library(reshape2)
+library(broom)
+library(caret)
+library(plotmo)
+library(lme4)
+library(afex)
+library(nlme)
+library(nnet)
+library(xlsx)
+library(readxl)
+library(Rserve)
+library(ggmap)
+library(reshape)
+library(VIM) 
+library(mi) 
+library(regtools) 
+library(mitools) 
+library(caTools)
+library(rpart)
+library(nnet)
+library(randomForest)
+library(ROCR)
+library(ResourceSelection)
+library(Deducer)
+library(olsrr)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+Import Data Set
+```{r}
+puffin <- read.table("puffin.txt",header = T)
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+Multiple Linear Regression
+```{r}
+model1 <- lm(nesting~.,puffin)
+summary(model1)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Interpretation
+Grass: For every percent increase in grass covered, the number of nests for every 9m^2 decreases by .007 on average holding all other variables constant
+Soil: For every cm increase in mean soil depth, the number of nests for every 9m^2 increases by .21 on average holding all other variables constant
+Angle: For every degree increase in angle of slope, the number of nests for every 9m^2 increases by .082 on average holding all other variables constant
+Distance: For every meter increase in distance from edge, the number of nests for every 9m^2 decreases by .367 on average holding all other variables constant
+R^2: 87.92% of the variation in number of nests is explained by the predictors grass, soil, angle, and distance
+
+Residual Plot
+```{r}
+resid(model1)
+```
+
+Studentized Residuals
+```{r}
+rstandard(model1)
+```
+
+Deleted studentized residuals
+```{r}
+rstudent(model1)
+```
+
+Difference between studentized residuals and deleted studentized residual
+```{r}
+rstandard(model1)-rstudent(model1)
+which.max(abs(rstandard(model1)-rstudent(model1)))
+```
+Obersvation 21 has the largest difference between studentized residuals and deleted studentized residuals. This means that observation 21 may be influential since its presence changes the predicted value the most in the data set. 
+
+DFFITS
+```{r}
+dffits(model1)
+which(dffits(model1)>3*sqrt((4+1)/(38-4-1)))
+```
+Observation 21 has DFFIT greater than the specified cutoff
+
+DFBETAS
+```{r}
+dfbetas(model1)
+```
+
+Removing observation 21 would decrease the coefficients for grass, soil, angle, and increase for distance
+
+Measures of Influence
+```{r}
+influence.measures(model1)
+```
+Observations 5 and 21 are flagged as being influential
+
+Obersvation 5 is flagged because it has a hat value > 3*p/n and observation 21 is flagged because of its DFFIT value > 3(sqrt((4+1)/(38-4-1)))
+
+Outlier Analysis
+```{r}
+ols_dfbetas_panel(model1)
+ols_cooksd_barplot(model1)
+ols_dffits_plot(model1)
+ols_srsd_plot(model1)
+ols_rsdlev_plot(model1)
+ols_dsrvsp_plot(model1)
+```
+
+I would consider observations 5, 21, 10, 24 as influential because observation 24 has fairly high DFBETAS for grass, angle, and distance and borderline high DFFITS
+
+Observation 10 has high DFBETA for distance, high cooks distance, and high DFFITS
+
+Observation 5 also has high leverage
