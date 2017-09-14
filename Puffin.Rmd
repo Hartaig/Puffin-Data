@@ -2,7 +2,9 @@
 title: "Puffin"
 author: "Hartaig Singh"
 date: "September 8, 2017"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup,message=FALSE,warning=FALSE, echo=FALSE}
@@ -60,12 +62,17 @@ model1 <- lm(nesting~.,puffin)
 summary(model1)
 ```
 
-Interpretation
-Grass: For every percent increase in grass covered, the number of nests for every 9m^2 decreases by .007 on average holding all other variables constant
-Soil: For every cm increase in mean soil depth, the number of nests for every 9m^2 increases by .21 on average holding all other variables constant
-Angle: For every degree increase in angle of slope, the number of nests for every 9m^2 increases by .082 on average holding all other variables constant
-Distance: For every meter increase in distance from edge, the number of nests for every 9m^2 decreases by .367 on average holding all other variables constant
-R^2: 87.92% of the variation in number of nests is explained by the predictors grass, soil, angle, and distance
+**Interpretation**
+
+*Grass:* For every percent increase in grass covered, the number of nests for every 9m^2 decreases by .007 on average holding all other variables constant
+
+*Soil:* For every cm increase in mean soil depth, the number of nests for every 9m^2 increases by .21 on average holding all other variables constant
+
+*Angle:* For every degree increase in angle of slope, the number of nests for every 9m^2 increases by .082 on average holding all other variables constant
+
+*Distance:* For every meter increase in distance from edge, the number of nests for every 9m^2 decreases by .367 on average holding all other variables constant
+
+*R^2:* 87.92% of the variation in number of nests is explained by the predictors grass, soil, angle, and distance
 
 Residual Plot
 ```{r}
@@ -102,6 +109,8 @@ dfbetas(model1)
 ```
 
 Removing observation 21 would decrease the coefficients for grass, soil, angle, and increase for distance
+
+To generalize, if an observation has a positive DFBETA, removing the observation would decrease the beta value. The opposite holds for a negative DFBETA.
 
 Measures of Influence
 ```{r}
